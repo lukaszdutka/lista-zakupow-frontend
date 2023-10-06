@@ -5,7 +5,7 @@ import AddRecipe from "./components/AddRecipe";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={process.env.PUBLIC_URL}>
       <Routes>
         <Route index path="/" element={<ComposeShoppingList/>}/>
         <Route path="/add-recipe" element={<AddRecipe/>}/>
