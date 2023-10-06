@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/lista-zakupow-frontend/static/css/main.1a8825b8.css",
+    "main.js": "/lista-zakupow-frontend/static/js/main.d8b4fc0d.js",
+    "static/js/787.d0aec768.chunk.js": "/lista-zakupow-frontend/static/js/787.d0aec768.chunk.js",
+    "index.html": "/lista-zakupow-frontend/index.html",
+    "main.1a8825b8.css.map": "/lista-zakupow-frontend/static/css/main.1a8825b8.css.map",
+    "main.d8b4fc0d.js.map": "/lista-zakupow-frontend/static/js/main.d8b4fc0d.js.map",
+    "787.d0aec768.chunk.js.map": "/lista-zakupow-frontend/static/js/787.d0aec768.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1a8825b8.css",
+    "static/js/main.d8b4fc0d.js"
+  ]
+}
