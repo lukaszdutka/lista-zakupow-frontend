@@ -11,7 +11,7 @@ function AddRecipe() {
   })
   const [suggestions, setSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
-
+  const [nameToCategory, setNameToCategory] = useState({})
 
   const handleInputChange = (e, index) => {
     console.log(e.target.value)
@@ -45,21 +45,28 @@ function AddRecipe() {
     const fetchRecipes = async () => {
       const recipes = await getRecipes()
 
-      const ingredientNames = recipes.map(r => r.ingredients).flat().map(ing => ing.name)
+      const ingredients = recipes.map(r => r.ingredients).flat();
+      const ingredientNames = ingredients.map(ing => ing.name)
       const uniqueIngredientNames = [...new Set(ingredientNames)]
 
       const categoryNames = recipes.map(r => r.ingredients).flat().map(r => r.category)
       const uniqueCategoryNames = [...new Set(categoryNames)]
       console.log({uniqueIngredientNames, uniqueCategoryNames})
+
+      const nameToCategory = {}
+      ingredients.forEach(ing => nameToCategory[ing.name] = ing.category)
+
       return {
         uniqueIngredientNames: [...uniqueIngredientNames],
-        uniqueCategories: [...uniqueCategoryNames]
+        uniqueCategories: [...uniqueCategoryNames],
+        nameToCategory: nameToCategory
       }
     }
     fetchRecipes()
       .then(res => {
         setSuggestions(res.uniqueIngredientNames)
         setCategorySuggestions(res.uniqueCategories)
+        setNameToCategory(res.nameToCategory)
       })
   }, [])
 
@@ -132,6 +139,12 @@ function AddRecipe() {
                     sx={{width: 300}}
                     onInputChange={(e, newValue) => {
                       recipe.ingredients[i].name = newValue
+                      //if newValue is in IngredientsNameToCategory
+                      if (nameToCategory[newValue] !== undefined) {
+                        recipe.ingredients[i].category = nameToCategory[newValue]
+                      } else {
+                        recipe.ingredients[i].category = ''
+                      }
                       setRecipe({...recipe})
                     }}
                     renderInput={(params) => <TextField
@@ -172,6 +185,7 @@ function AddRecipe() {
                   <Autocomplete
                     freeSolo
                     id="ingredient-category"
+                    value={ingredient.category}
                     options={categorySuggestions}
                     sx={{width: 300}}
                     onInputChange={(e, newValue) => {
