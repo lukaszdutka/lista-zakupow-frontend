@@ -3,6 +3,7 @@ import "./ComposeShoppingList.css";
 import {getRecipes} from "../api/api";
 import React, {useEffect, useState} from "react";
 import {Box, Button, Grid, List, ListItem, Paper, Tooltip, Typography} from "@mui/material";
+import {Link} from "react-router-dom";
 
 function ComposeShoppingList() {
   const [recipes, setRecipes] = useState([]);
@@ -51,15 +52,14 @@ function ComposeShoppingList() {
     getRecipes().then(r => setRecipes(r))
   }, []);
 
-  function createTooltip(recipe) {
+  const createTooltip = (recipe) => {
     return (
       <React.Fragment>
-        {recipe.videoUrl ? <a href={recipe.videoUrl}>instrukcja</a> : ""}
-        {
-          recipe.ingredients.map(ing => {
-            return <div key={ing.name}>{ing.quantity}x - {ing.name}</div>
-          })
-        }
+        {recipe.videoUrl ?
+          <Typography><Link to={recipe.videoUrl} target="_blank">link do instrukcji</Link></Typography> : ""}
+        <div>
+          {recipe.ingredients.map(ing => <div key={ing.name}>{ing.quantity}x - {ing.name}</div>)}
+        </div>
       </React.Fragment>
     );
   }

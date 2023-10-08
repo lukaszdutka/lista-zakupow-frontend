@@ -1,16 +1,18 @@
+import {Button} from "@mui/material";
 import {Link} from "react-router-dom";
-import "./Navbar.css"
+import "./Navbar.css";
 
 const Navbar = () => {
   return (
     <nav className="nav">
-      <button className="">
-        <Link to="/">Skomponuj listę zakupów</Link>
-      </button>
-      <button>
-        <Link to="/add-recipe">Dodaj przepis</Link>
-      </button>
+      <Button className="button" variant="contained" color="primary" component={Link} to="/">
+        Skomponuj listę zakupów
+      </Button>
+      <Button className="button" variant="contained" color="primary" component={Link} to="/add-recipe">
+        Dodaj przepis
+      </Button>
     </nav>
   )
 }
-export default Navbar
+
+export default Navbar;

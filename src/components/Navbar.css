@@ -1,17 +1,10 @@
 .nav {
     background: #282c34;
     height: 9vh;
+    display: flex;
+    justify-content: left;
+    align-items: center;
 }
-
-.nav button {
-    margin: 10px;
-    padding: 10px;
-    font-size: 20px;
-    background: #61dafb;
-    color: #282c34;
-
-}
-
-.nav button a {
-    text-decoration: none;
+.nav .button {
+    margin-left: 30px;
 }
