@@ -2,6 +2,7 @@ import Navbar from "./Navbar";
 import React, {useEffect, useState} from "react";
 import {addRecipe, getRecipes} from "../api/api";
 import {Autocomplete, Button, Checkbox, FormControl, FormControlLabel, TextField} from "@mui/material";
+import './AddRecipe.css';
 
 function AddRecipe() {
   const [recipe, setRecipe] = useState({
@@ -12,22 +13,6 @@ function AddRecipe() {
   const [suggestions, setSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
   const [nameToCategory, setNameToCategory] = useState({})
-
-  const handleInputChange = (e, index) => {
-    console.log(e.target.value)
-    console.log(e.target.name)
-    const {name, value} = e.target;
-    const list = [...recipe.ingredients];
-    if (value === "on") {
-      list[index][name] = false;
-    } else if (value === "off") {
-      list[index][name] = true;
-    } else {
-      list[index][name] = value;
-    }
-    setRecipe({...recipe, ingredients: list,});
-  };
-
   const handleAddIngredient = () => {
     setRecipe({
       ...recipe,
@@ -159,7 +144,7 @@ function AddRecipe() {
                   <TextField
                     type="number"
                     label="Ilość"
-                    error={ingredient.quantity === undefined || ingredient.quantity.trim().length == 0 || isNaN(ingredient.quantity)}
+                    error={ingredient.quantity === undefined || ingredient.quantity.trim().length === 0 || isNaN(ingredient.quantity)}
                     name="quantity"
                     placeholder="tylko liczba"
                     value={ingredient.quantity}
@@ -174,7 +159,7 @@ function AddRecipe() {
                         type="checkbox"
                         name="isRarelyBought"
                         checked={ingredient.isRarelyBought}
-                        onChange={e => {
+                        onChange={() => {
                           recipe.ingredients[i].isRarelyBought = !ingredient.isRarelyBought
                           setRecipe({...recipe})
                         }}
@@ -213,7 +198,7 @@ function AddRecipe() {
           <h1>Sprawdź wszystko dokładnie!</h1>
         </FormControl>
         <div className={"submitGame"}>
-          <Button variant="contained" onClick={e => tryAddRecipe(recipe)}>Dodaj Przepis!</Button>
+          <Button variant="contained" onClick={() => tryAddRecipe(recipe)}>Dodaj Przepis!</Button>
         </div>
       </div>
     </div>

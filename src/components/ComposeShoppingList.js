@@ -1,9 +1,8 @@
 import Navbar from "./Navbar";
-
-import "./ComposeShoppingList.css"
+import "./ComposeShoppingList.css";
 import {getRecipes} from "../api/api";
 import React, {useEffect, useState} from "react";
-import {Button, List, ListItem, Tooltip, Typography} from "@mui/material";
+import {Box, Button, Grid, List, ListItem, Paper, Tooltip, Typography} from "@mui/material";
 
 function ComposeShoppingList() {
   const [recipes, setRecipes] = useState([]);
@@ -68,51 +67,64 @@ function ComposeShoppingList() {
   return (
     <div>
       <Navbar/>
-      <div className="container">
-        <h1>Hosting on: https://render.com/docs/free</h1>
-
-        <div className="row">
-          <div className="column">
-            <Typography variant="h6">Dostępne Przepisy</Typography>
-            <List>
-              {recipes.map((recipe, index) => (
-                <ListItem key={index}>
-                  <Tooltip title={createTooltip(recipe)} arrow>
-                    <Typography>{recipe.name}</Typography>
-                  </Tooltip>
-                  <Button onClick={() => addRecipe(recipe)}>Add</Button>
-                </ListItem>
+      <Box className="container" sx={{bgcolor: 'antiquewhite', p: 3}}>
+        <Grid container spacing={3}>
+          <Grid item xs={4}>
+            <Paper elevation={3} sx={{p: 2}}>
+              <Typography variant="h6" gutterBottom>
+                Dostępne Przepisy
+              </Typography>
+              <List>
+                {recipes.map((recipe, index) => (
+                  <ListItem key={index}>
+                    <Tooltip title={createTooltip(recipe)} arrow>
+                      <Typography>{recipe.name}</Typography>
+                    </Tooltip>
+                    <Button variant="contained" color="primary" onClick={() => addRecipe(recipe)}>
+                      Add
+                    </Button>
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+          <Grid item xs={4}>
+            <Paper elevation={3} sx={{p: 2}}>
+              <Typography variant="h6" gutterBottom>
+                Menu
+              </Typography>
+              <List>
+                {shoppingList.map((recipe, index) => (
+                  <ListItem key={index}>
+                    {recipe.name} <Button variant="contained" color="secondary" onClick={() => removeRecipe(index)}>
+                    Remove
+                  </Button>
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+          <Grid item xs={4}>
+            <Paper elevation={3} sx={{p: 2}}>
+              <Typography variant="h6" gutterBottom>
+                Lista zakupów
+              </Typography>
+              {Object.entries(totalIngredients).map(([category, ingredients], index) => (
+                <Box key={index}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    {category}
+                  </Typography>
+                  <List>
+                    {Object.entries(ingredients).map(([name, quantity], i) => (
+                      <ListItem key={i}>{name}: {quantity}</ListItem>
+                    ))}
+                  </List>
+                </Box>
               ))}
-            </List>
-          </div>
-          <div className="column">
-
-            <Typography variant="h6">Menu</Typography>
-            <List>
-              {shoppingList.map((recipe, index) => (
-                <ListItem key={index}>
-                  {recipe.name} <Button onClick={() => removeRecipe(index)}>Remove</Button>
-                </ListItem>
-              ))}
-            </List>
-
-          </div>
-          <div className="column">
-
-            <Typography variant="h6">Lista zakupów</Typography>
-            {Object.entries(totalIngredients).map(([category, ingredients], index) => (
-              <div key={index}>
-                <Typography variant="subtitle1">{category}</Typography>
-                <List>
-                  {Object.entries(ingredients).map(([name, quantity], i) => (
-                    <ListItem key={i}>{name}: {quantity}</ListItem>
-                  ))}
-                </List>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
     </div>
   )
 }

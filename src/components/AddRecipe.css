@@ -1,0 +1,26 @@
+.container {
+    background: antiquewhite;
+    height: 85vh;
+    padding: 3vh 3vw;
+}
+
+.container label {
+    margin-right: 1vw;
+}
+
+.ingredient-container {
+    display: flex;
+    margin: 1vh;
+}
+
+.column {
+    float: left;
+    width: 33.33%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
