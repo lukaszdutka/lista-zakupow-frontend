@@ -96,9 +96,11 @@ function ComposeShoppingList() {
               <List>
                 {shoppingList.map((recipe, index) => (
                   <ListItem key={index}>
-                    {recipe.name} <Button variant="contained" color="secondary" onClick={() => removeRecipe(index)}>
-                    Remove
-                  </Button>
+                    <div>
+                      {recipe.name}
+                      <Button variant="contained" color="secondary" onClick={() => removeRecipe(index)}>Remove</Button>
+                    </div>
+                    {recipe.videoUrl ? <div>{recipe.videoUrl}</div> : ""}
                   </ListItem>
                 ))}
               </List>
