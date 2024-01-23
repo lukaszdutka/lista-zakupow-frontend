@@ -25,8 +25,8 @@ export async function getRecipes() {
   }
 
   const returningRecipes = recipes.map(recipe => {
-      const quantities = recipe.recipeingredients;
-      return ({
+      const quantities = recipe[recipeIngredientsTable];
+      return {
         name: recipe.name,
         recipeUrl: recipe.recipeurl,
         photoUrl: recipe.photourl,
@@ -39,7 +39,7 @@ export async function getRecipes() {
             photoUrl: product.photourl,
           })
         )
-      });
+      };
     }
   )
 
@@ -67,17 +67,23 @@ async function insertRecipe(data) {
 }
 
 async function upsertIngredients(data) {
-  //name, category, unit, photourl
   const ingredients = data.ingredients.map(i => ({
+    id: i.id || undefined,
     name: i.name,
     category: i.category || "inne",
     unit: i.unit,
     photourl: null
-  }))
+  })).map(ingredient =>
+    Object.fromEntries(
+      Object.entries(ingredient).filter(([_, value]) => value !== null && value !== undefined)
+    ));
 
   // Insert the ingredients
-  const {data: returnedIngredients, error: ingredientsError} = await supabase
-    .from('products')
+  const {
+    data: returnedIngredients,
+    error: ingredientsError
+  } = await supabase
+    .from(productsTable)
     .upsert(ingredients)
     .select();
 
@@ -88,10 +94,10 @@ async function upsertIngredients(data) {
   return returnedIngredients;
 }
 
-async function insertRecipeIngredients(returnedIngredients, recipeId, quantities) {
-  const recipeIngredients = returnedIngredients.map((ingredient, i) => ({
+async function insertRecipeIngredients(ingredientIds, recipeId, quantities) {
+  const recipeIngredients = ingredientIds.map((ingredientId, i) => ({
     recipe_id: recipeId,
-    product_id: ingredient.id,
+    product_id: ingredientId,
     quantity: quantities[i],
   }))
 
@@ -108,8 +114,10 @@ async function insertRecipeIngredients(returnedIngredients, recipeId, quantities
 export async function addRecipe(data) {
   const recipeId = await insertRecipe(data);
   const returnedIngredients = await upsertIngredients(data);
-  const quantities = data.ingredients.map(i => i.quantity)
-  await insertRecipeIngredients(returnedIngredients, recipeId, quantities);
 
-  console.log('Recipe and ingredients added successfully');
+  const quantities = data.ingredients.map(i => i.quantity)
+  const ingredientIds = returnedIngredients.map(i => i.id);
+  await insertRecipeIngredients(ingredientIds, recipeId, quantities);
+
+  console.log('Recipe and ingredients added, if no errors');
 }
