@@ -9,7 +9,7 @@ function AddRecipe() {
   const [recipe, setRecipe] = useState({
     name: '',
     videoUrl: '',
-    ingredients: [{name: '', quantity: '1.0', category: '', unit: ''}],
+    ingredients: [{id: '', name: '', quantity: '1.0', category: '', unit: ''}],
   })
   const [suggestions, setSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
@@ -18,7 +18,7 @@ function AddRecipe() {
   const handleAddIngredient = () => {
     setRecipe({
       ...recipe,
-      ingredients: [...recipe.ingredients, {name: '', quantity: '1.0', category: '', unit: ''}]
+      ingredients: [...recipe.ingredients, {id: '', name: '', quantity: '1.0', category: '', unit: ''}]
     });
   };
 
@@ -41,13 +41,14 @@ function AddRecipe() {
 
       const nameToProduct = {}
       ingredients.forEach(ing => nameToProduct[ing.name] = {
+        id: ing.id,
         category: ing.category,
         unit: ing.unit
       })
 
       return {
-        uniqueIngredientNames: [...uniqueIngredientNames],
-        uniqueCategories: [...uniqueCategoryNames],
+        uniqueIngredientNames: uniqueIngredientNames,
+        uniqueCategories: uniqueCategoryNames,
         nameToProduct: nameToProduct
       }
     }
@@ -131,9 +132,11 @@ function AddRecipe() {
                       //if newValue is in IngredientsNameToProduct
                       if (nameToProduct[newValue] !== undefined) {
                         console.log({x: nameToProduct[newValue]})
+                        recipe.ingredients[i].id = nameToProduct[newValue].id
                         recipe.ingredients[i].category = nameToProduct[newValue].category
                         recipe.ingredients[i].unit = nameToProduct[newValue].unit
                       } else {
+                        recipe.ingredients[i].id = undefined
                         recipe.ingredients[i].category = ''
                         recipe.ingredients[i].unit = ''
                       }
