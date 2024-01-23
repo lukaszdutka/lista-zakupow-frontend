@@ -4,15 +4,19 @@ const supabaseUrl = process.env.REACT_APP_SUPABASE_API_URL
 const supabaseKey = process.env.REACT_APP_SUPABASE_API_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+const recipesTable = 'recipes';
+const productsTable = `products`;
+const recipeIngredientsTable = 'recipeingredients';
+
 export async function getRecipes() {
   const {data: recipes, error} = await supabase
-    .from('recipes')
+    .from(recipesTable)
     .select(`
       name,
       recipeurl,
       photourl,
-      products(id, name, category, unit, photourl),
-      recipeingredients(product_id, quantity)
+      ${productsTable}(id, name, category, unit, photourl),
+      ${recipeIngredientsTable}(product_id, quantity)
     `);
 
   if (error) {
@@ -52,7 +56,7 @@ async function insertRecipe(data) {
   }
 
   const {data: recipeData, error: recipeError} = await supabase
-    .from('recipes')
+    .from(recipesTable)
     .insert([recipe])
     .select();
 
@@ -67,7 +71,7 @@ async function upsertIngredients(data) {
   const ingredients = data.ingredients.map(i => ({
     name: i.name,
     category: i.category || "inne",
-    unit: "szt",
+    unit: i.unit,
     photourl: null
   }))
 
@@ -92,7 +96,7 @@ async function insertRecipeIngredients(returnedIngredients, recipeId, quantities
   }))
 
   const {error: recipeIngredientsError} = await supabase
-    .from('recipeingredients')
+    .from(recipeIngredientsTable)
     .insert(recipeIngredients)
 
   if (recipeIngredientsError) {
@@ -108,5 +112,4 @@ export async function addRecipe(data) {
   await insertRecipeIngredients(returnedIngredients, recipeId, quantities);
 
   console.log('Recipe and ingredients added successfully');
-  // await axios.post(`${API_BASE_URL}/recipe`, body)
 }

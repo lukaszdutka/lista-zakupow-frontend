@@ -1,22 +1,24 @@
 import Navbar from "./Navbar";
 import React, {useEffect, useState} from "react";
 import {addRecipe, getRecipes} from "../api/api";
-import {Autocomplete, Button, Checkbox, FormControl, FormControlLabel, TextField} from "@mui/material";
+import {Autocomplete, Button, FormControl, TextField} from "@mui/material";
 import './AddRecipe.css';
+
 
 function AddRecipe() {
   const [recipe, setRecipe] = useState({
     name: '',
     videoUrl: '',
-    ingredients: [{name: '', quantity: '1.0', category: '', isRarelyBought: false}],
+    ingredients: [{name: '', quantity: '1.0', category: '', unit: ''}],
   })
   const [suggestions, setSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
-  const [nameToCategory, setNameToCategory] = useState({})
+  const [nameToProduct, setNameToProduct] = useState({})
+  const [unitSuggestions, _] = useState(['szt', 'g', 'ml', 'łyżka', 'łyżeczka', 'szczypta', 'szklanka'])
   const handleAddIngredient = () => {
     setRecipe({
       ...recipe,
-      ingredients: [...recipe.ingredients, {name: '', quantity: '1.0', category: '', isRarelyBought: false}]
+      ingredients: [...recipe.ingredients, {name: '', quantity: '1.0', category: '', unit: ''}]
     });
   };
 
@@ -36,22 +38,24 @@ function AddRecipe() {
 
       const categoryNames = recipes.map(r => r.ingredients).flat().map(r => r.category)
       const uniqueCategoryNames = [...new Set(categoryNames)]
-      console.log({uniqueIngredientNames, uniqueCategoryNames})
 
-      const nameToCategory = {}
-      ingredients.forEach(ing => nameToCategory[ing.name] = ing.category)
+      const nameToProduct = {}
+      ingredients.forEach(ing => nameToProduct[ing.name] = {
+        category: ing.category,
+        unit: ing.unit
+      })
 
       return {
         uniqueIngredientNames: [...uniqueIngredientNames],
         uniqueCategories: [...uniqueCategoryNames],
-        nameToCategory: nameToCategory
+        nameToProduct: nameToProduct
       }
     }
     fetchRecipes()
       .then(res => {
         setSuggestions(res.uniqueIngredientNames)
         setCategorySuggestions(res.uniqueCategories)
-        setNameToCategory(res.nameToCategory)
+        setNameToProduct(res.nameToProduct)
       })
   }, [])
 
@@ -124,11 +128,14 @@ function AddRecipe() {
                     sx={{width: 300}}
                     onInputChange={(e, newValue) => {
                       recipe.ingredients[i].name = newValue
-                      //if newValue is in IngredientsNameToCategory
-                      if (nameToCategory[newValue] !== undefined) {
-                        recipe.ingredients[i].category = nameToCategory[newValue]
+                      //if newValue is in IngredientsNameToProduct
+                      if (nameToProduct[newValue] !== undefined) {
+                        console.log({x: nameToProduct[newValue]})
+                        recipe.ingredients[i].category = nameToProduct[newValue].category
+                        recipe.ingredients[i].unit = nameToProduct[newValue].unit
                       } else {
                         recipe.ingredients[i].category = ''
+                        recipe.ingredients[i].unit = ''
                       }
                       setRecipe({...recipe})
                     }}
@@ -153,20 +160,28 @@ function AddRecipe() {
                       setRecipe({...recipe})
                     }}
                   />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        type="checkbox"
-                        name="isRarelyBought"
-                        checked={ingredient.isRarelyBought}
-                        onChange={() => {
-                          recipe.ingredients[i].isRarelyBought = !ingredient.isRarelyBought
+
+                  <Autocomplete
+                    freeSolo
+                    id="ingredient-unit"
+                    value={ingredient.unit}
+                    options={unitSuggestions}
+                    sx={{width: 200}}
+                    onInputChange={(e, newValue) => {
+                      recipe.ingredients[i].unit = newValue
+                      setRecipe({...recipe})
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Jednostka"
+                        error={ingredient.unit === undefined || !ingredient.unit.trim().length}
+                        onChange={e => {
+                          recipe.ingredients[i].unit = e.target.value;
                           setRecipe({...recipe})
-                        }}
-                      />
-                    }
-                    labelPlacement="start"
-                    label="Rzadko kupowany?"/>
+                        }}/>
+                    )}
+                  />
                   <Autocomplete
                     freeSolo
                     id="ingredient-category"
@@ -187,7 +202,6 @@ function AddRecipe() {
                           setRecipe({...recipe})
                         }}/>
                     )}
-
                   />
                   <Button variant="contained" color="error" onClick={() => handleRemoveIngredient(i)}>Remove</Button>
                 </div>

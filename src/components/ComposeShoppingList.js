@@ -64,42 +64,59 @@ function ComposeShoppingList() {
     );
   }
 
+  function changeQuantity(category, name, newQuantity) {
+    return () => {
+      totalIngredients[category][name] = newQuantity
+      setTotalIngredients({...totalIngredients})
+    };
+  }
+
+  function generateList(totalIngredients) {
+    console.log({totalIngredients});
+    let finalString = '';
+    for (const [category, ingredients] of Object.entries(totalIngredients)) {
+      finalString += category.charAt(0).toUpperCase() + category.slice(1) + "\n";
+      for (const [name, quantity] of Object.entries(ingredients)) {
+        finalString += "\t" + name.charAt(0).toUpperCase() + name.slice(1) + ` x${quantity}\n`;
+      }
+    }
+    return finalString;
+  }
+
   return (
     <div>
       <Navbar/>
       <Box className="container" sx={{bgcolor: 'antiquewhite', p: 3}}>
         <Grid container spacing={3}>
-          <Grid item xs={4}>
+          <Grid item xs={5}>
             <Paper elevation={3} sx={{p: 2}}>
-              <Typography variant="h6" gutterBottom>
-                Dostępne Przepisy
-              </Typography>
+              <Typography variant="h6" gutterBottom>Dostępne Przepisy</Typography>
               <List>
                 {recipes.map((recipe, index) => (
                   <ListItem key={index}>
                     <Tooltip title={createTooltip(recipe)} arrow>
                       <Typography>{recipe.name}</Typography>
                     </Tooltip>
-                    <Button variant="contained" color="primary" onClick={() => addRecipe(recipe)}>
-                      Add
-                    </Button>
+                    <Box sx={{'margin-left': 'auto'}}>
+                      <Button variant="contained" color="primary" onClick={() => addRecipe(recipe)}>Add</Button>
+                    </Box>
                   </ListItem>
                 ))}
               </List>
             </Paper>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <Paper elevation={3} sx={{p: 2}}>
-              <Typography variant="h6" gutterBottom>
-                Menu
-              </Typography>
+              <Typography variant="h6" gutterBottom>Menu</Typography>
               <List>
                 {shoppingList.map((recipe, index) => (
                   <ListItem key={index}>
-                    <div>
+                    <Typography>
                       {recipe.name}
+                    </Typography>
+                    <Box sx={{'margin-left': 'auto'}}>
                       <Button variant="contained" color="secondary" onClick={() => removeRecipe(index)}>Remove</Button>
-                    </div>
+                    </Box>
                     {recipe.videoUrl ? <div>{recipe.videoUrl}</div> : ""}
                   </ListItem>
                 ))}
@@ -118,13 +135,22 @@ function ComposeShoppingList() {
                   </Typography>
                   <List>
                     {Object.entries(ingredients).map(([name, quantity], i) => (
-                      <ListItem key={i}>{name}: {quantity}</ListItem>
+                      <ListItem key={i}>
+                        <Typography>{name}: {quantity} szt</Typography>
+                        <Box sx={{'margin-left': 'auto'}}>
+                          <Button variant="contained" color="primary"
+                                  onClick={changeQuantity(category, name, quantity + 1)}>+1</Button>
+                          <Button variant="contained" color="primary"
+                                  onClick={changeQuantity(category, name, quantity - 1)}>-1</Button>
+                        </Box>
+                      </ListItem>
                     ))}
                   </List>
                 </Box>
               ))}
             </Paper>
           </Grid>
+          <Typography whiteSpace={'pre-wrap'}>{generateList(totalIngredients)}</Typography>
         </Grid>
       </Box>
     </div>
