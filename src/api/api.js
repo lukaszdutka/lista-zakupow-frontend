@@ -5,18 +5,24 @@ const supabaseKey = process.env.REACT_APP_SUPABASE_API_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const recipesTable = 'recipes';
-const productsTable = `products`;
-const recipeIngredientsTable = 'recipeingredients';
+const ingredientsTable = `ingredients`;
+const recipeIngredientsTable = 'recipe_ingredients';
 
 export async function getRecipes() {
+  //todo: try it:
+  // const { data, error } = await supabase
+  //   .from('teams')
+  //   .select('teams.team_name, users.name')
+  //   .innerJoin('members', 'teams.id', 'members.team_id')
+  //   .innerJoin('users', 'members.user_id', 'users.id');
   const {data: recipes, error} = await supabase
     .from(recipesTable)
     .select(`
       name,
-      recipeurl,
-      photourl,
-      ${productsTable}(id, name, category, unit, photourl),
-      ${recipeIngredientsTable}(product_id, quantity)
+      recipe_url,
+      photo_url,
+      ${ingredientsTable}(id, name, category, unit, photo_url),
+      ${recipeIngredientsTable}(ingredient_id, quantity)
     `);
 
   if (error) {
@@ -28,15 +34,15 @@ export async function getRecipes() {
       const quantities = recipe[recipeIngredientsTable];
       return {
         name: recipe.name,
-        recipeUrl: recipe.recipeurl,
-        photoUrl: recipe.photourl,
-        ingredients: recipe.products.map(product => ({
-            id: product.id,
-            name: product.name,
-            category: product.category,
-            unit: product.unit,
-            quantity: quantities.find(e => e.product_id === product.id).quantity,
-            photoUrl: product.photourl,
+        recipeUrl: recipe.recipe_url,
+        photoUrl: recipe.photo_url,
+        ingredients: recipe.ingredients.map(ingredient => ({
+            id: ingredient.id,
+            name: ingredient.name,
+            category: ingredient.category,
+            unit: ingredient.unit,
+            quantity: quantities.find(e => e.ingredient_id === ingredient.id).quantity,
+            photoUrl: ingredient.photo_url,
           })
         )
       };
@@ -51,8 +57,8 @@ export async function getRecipes() {
 async function insertRecipe(data) {
   const recipe = {
     name: data.name,
-    recipeurl: data.videoUrl,
-    photourl: null,
+    recipe_url: data.videoUrl,
+    photo_url: null,
   }
 
   const {data: recipeData, error: recipeError} = await supabase
@@ -68,22 +74,22 @@ async function insertRecipe(data) {
 
 async function upsertIngredients(data) {
   const ingredients = data.ingredients.map(i => ({
-    id: i.id || undefined,
+    id: i.id || crypto.randomUUID(),
     name: i.name,
     category: i.category || "inne",
     unit: i.unit,
-    photourl: null
-  })).map(ingredient =>
-    Object.fromEntries(
-      Object.entries(ingredient).filter(([_, value]) => value !== null && value !== undefined)
-    ));
+    photo_url: null
+  }))
+
+  console.log("trying to add:")
+  console.log({ingredients})
 
   // Insert the ingredients
   const {
     data: returnedIngredients,
     error: ingredientsError
   } = await supabase
-    .from(productsTable)
+    .from(ingredientsTable)
     .upsert(ingredients)
     .select();
 
@@ -97,7 +103,7 @@ async function upsertIngredients(data) {
 async function insertRecipeIngredients(ingredientIds, recipeId, quantities) {
   const recipeIngredients = ingredientIds.map((ingredientId, i) => ({
     recipe_id: recipeId,
-    product_id: ingredientId,
+    ingredient_id: ingredientId,
     quantity: quantities[i],
   }))
 

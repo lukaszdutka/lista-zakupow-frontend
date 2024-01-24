@@ -9,16 +9,16 @@ function AddRecipe() {
   const [recipe, setRecipe] = useState({
     name: '',
     videoUrl: '',
-    ingredients: [{id: '', name: '', quantity: '1.0', category: '', unit: ''}],
+    ingredients: [{id: undefined, name: '', quantity: '1.0', category: '', unit: ''}],
   })
   const [suggestions, setSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
-  const [nameToProduct, setNameToProduct] = useState({})
+  const [nameToIngredient, setNameToIngredient] = useState({})
   const [unitSuggestions, _] = useState(['szt', 'g', 'ml', 'łyżka', 'łyżeczka', 'szczypta', 'szklanka'])
   const handleAddIngredient = () => {
     setRecipe({
       ...recipe,
-      ingredients: [...recipe.ingredients, {id: '', name: '', quantity: '1.0', category: '', unit: ''}]
+      ingredients: [...recipe.ingredients, {id: undefined, name: '', quantity: '1.0', category: '', unit: ''}]
     });
   };
 
@@ -39,8 +39,8 @@ function AddRecipe() {
       const categoryNames = recipes.map(r => r.ingredients).flat().map(r => r.category)
       const uniqueCategoryNames = [...new Set(categoryNames)]
 
-      const nameToProduct = {}
-      ingredients.forEach(ing => nameToProduct[ing.name] = {
+      const nameToIngredient = {}
+      ingredients.forEach(ing => nameToIngredient[ing.name] = {
         id: ing.id,
         category: ing.category,
         unit: ing.unit
@@ -49,14 +49,14 @@ function AddRecipe() {
       return {
         uniqueIngredientNames: uniqueIngredientNames,
         uniqueCategories: uniqueCategoryNames,
-        nameToProduct: nameToProduct
+        nameToIngredient: nameToIngredient
       }
     }
     fetchRecipes()
       .then(res => {
         setSuggestions(res.uniqueIngredientNames)
         setCategorySuggestions(res.uniqueCategories)
-        setNameToProduct(res.nameToProduct)
+        setNameToIngredient(res.nameToIngredient)
       })
   }, [])
 
@@ -129,12 +129,11 @@ function AddRecipe() {
                     sx={{width: 300}}
                     onInputChange={(e, newValue) => {
                       recipe.ingredients[i].name = newValue
-                      //if newValue is in IngredientsNameToProduct
-                      if (nameToProduct[newValue] !== undefined) {
-                        console.log({x: nameToProduct[newValue]})
-                        recipe.ingredients[i].id = nameToProduct[newValue].id
-                        recipe.ingredients[i].category = nameToProduct[newValue].category
-                        recipe.ingredients[i].unit = nameToProduct[newValue].unit
+                      const existingIngredient = nameToIngredient[newValue];
+                      if (existingIngredient !== undefined) {
+                        recipe.ingredients[i].id = existingIngredient.id
+                        recipe.ingredients[i].category = existingIngredient.category
+                        recipe.ingredients[i].unit = existingIngredient.unit
                       } else {
                         recipe.ingredients[i].id = undefined
                         recipe.ingredients[i].category = ''

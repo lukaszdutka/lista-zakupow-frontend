@@ -72,7 +72,7 @@ function ComposeShoppingList() {
   }
 
   function generateList(totalIngredients) {
-    console.log({totalIngredients});
+    //todo: refactor it into state that rerenders only on "lista zakupów" change
     let finalString = '';
     for (const [category, ingredients] of Object.entries(totalIngredients)) {
       finalString += category.charAt(0).toUpperCase() + category.slice(1) + "\n";
