@@ -8,7 +8,7 @@ import {Link} from "react-router-dom";
 function ComposeShoppingList() {
   const [recipes, setRecipes] = useState([]);
   const [shoppingList, setShoppingList] = useState([]);
-  const [totalIngredients, setTotalIngredients] = useState({});
+  const [totalIngredients, setTotalIngredients] = useState([]);
 
   const addRecipe = (recipe) => {
     setShoppingList([...shoppingList, recipe]);
@@ -26,26 +26,29 @@ function ComposeShoppingList() {
   }
 
   const updateTotalIngredients = (ingredients, action) => {
-    const updatedIngredients = {...totalIngredients};
+    const updatedIngredients = [...totalIngredients];
+
     ingredients.forEach(ingredient => {
+      const existingIngredient = updatedIngredients.find(i => i.id === ingredient.id);
       if (action === 'add') {
-        if (updatedIngredients[ingredient.category]) {
-          updatedIngredients[ingredient.category][ingredient.name] =
-            threeDecimals(Number(updatedIngredients[ingredient.category][ingredient.name] || 0) + Number(ingredient.quantity));
+        if (!existingIngredient) {
+          updatedIngredients.push({
+            id: ingredient.id,
+            name: ingredient.name,
+            category: ingredient.category,
+            quantity: ingredient.quantity,
+            unit: ingredient.unit
+          })
         } else {
-          updatedIngredients[ingredient.category] = {[ingredient.name]: ingredient.quantity};
-        }
-      } else if (action === 'remove' && updatedIngredients[ingredient.category]) {
-        updatedIngredients[ingredient.category][ingredient.name] = threeDecimals(updatedIngredients[ingredient.category][ingredient.name] - ingredient.quantity);
-        if (updatedIngredients[ingredient.category][ingredient.name] <= 0) {
-          delete updatedIngredients[ingredient.category][ingredient.name];
-          if (JSON.stringify(updatedIngredients[ingredient.category]) === "{}") {
-            delete updatedIngredients[ingredient.category]
-          }
+          existingIngredient.quantity += ingredient.quantity
         }
       }
+      if (action === 'remove' && existingIngredient) {
+        existingIngredient.quantity -= ingredient.quantity
+      }
     });
-    setTotalIngredients(updatedIngredients);
+    console.log({entries: groupBy(updatedIngredients, "category")});
+    setTotalIngredients(updatedIngredients.filter(i => i.quantity > 0));
   };
 
   useEffect(() => {
@@ -64,20 +67,27 @@ function ComposeShoppingList() {
     );
   }
 
-  function changeQuantity(category, name, newQuantity) {
+  function changeQuantity(ingredientId, change) {
     return () => {
-      totalIngredients[category][name] = newQuantity
-      setTotalIngredients({...totalIngredients})
+      totalIngredients.find(i => i.id === ingredientId).quantity += change
+      setTotalIngredients([...totalIngredients])
     };
   }
+
+  const groupBy = (list, by) => list.reduce((group, item) => {
+    const value = item[by]
+    group[value] = group[value] ?? [];
+    group[value].push(item);
+    return group;
+  }, {});
 
   function generateList(totalIngredients) {
     //todo: refactor it into state that rerenders only on "lista zakupów" change
     let finalString = '';
-    for (const [category, ingredients] of Object.entries(totalIngredients)) {
+    for (const [category, ingredients] of Object.entries(groupBy(totalIngredients, "category"))) {
       finalString += category.charAt(0).toUpperCase() + category.slice(1) + "\n";
-      for (const [name, quantity] of Object.entries(ingredients)) {
-        finalString += "\t" + name.charAt(0).toUpperCase() + name.slice(1) + ` x${quantity}\n`;
+      for (const ingredient of ingredients) {
+        finalString += "\t" + ingredient.name.charAt(0).toUpperCase() + ingredient.name.slice(1) + ` x ${ingredient.quantity}${ingredient.unit}\n`;
       }
     }
     return finalString;
@@ -128,26 +138,28 @@ function ComposeShoppingList() {
               <Typography variant="h6" gutterBottom>
                 Lista zakupów
               </Typography>
-              {Object.entries(totalIngredients).map(([category, ingredients], index) => (
-                <Box key={index}>
-                  <Typography variant="subtitle1" gutterBottom>
-                    {category}
-                  </Typography>
-                  <List>
-                    {Object.entries(ingredients).map(([name, quantity], i) => (
-                      <ListItem key={i}>
-                        <Typography>{name}: {quantity} szt</Typography>
-                        <Box sx={{'margin-left': 'auto'}}>
-                          <Button variant="contained" color="primary"
-                                  onClick={changeQuantity(category, name, quantity + 1)}>+1</Button>
-                          <Button variant="contained" color="primary"
-                                  onClick={changeQuantity(category, name, quantity - 1)}>-1</Button>
-                        </Box>
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              ))}
+              {
+                Object.entries(groupBy(totalIngredients, "category")).map(([key, value]) => (
+                  <Box key={key}>
+                    <Typography variant="subtitle1" gutterBottom>
+                      {key}
+                    </Typography>
+                    <List>
+                      {value.map(ing => (
+                        <ListItem key={ing.id}>
+                          <Typography>{ing.name}: {ing.quantity} {ing.unit}</Typography>
+                          <Box sx={{'margin-left': 'auto'}}>
+                            <Button variant="contained" color="primary"
+                                    onClick={changeQuantity(ing.id, 1)}>+1</Button>
+                            <Button variant="contained" color="primary"
+                                    onClick={changeQuantity(ing.id, -1)}>-1</Button>
+                          </Box>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+                ))
+              }
             </Paper>
           </Grid>
           <Typography whiteSpace={'pre-wrap'}>{generateList(totalIngredients)}</Typography>
