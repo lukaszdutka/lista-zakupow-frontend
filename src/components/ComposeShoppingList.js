@@ -21,9 +21,9 @@ function ComposeShoppingList() {
     updateTotalIngredients(recipe.ingredients, 'remove');
   };
 
-  function threeDecimals(number) {
-    return Math.round(number * 1000) / 1000;
-  }
+  // function threeDecimals(number) {
+  //   return Math.round(number * 1000) / 1000;
+  // }
 
   const updateTotalIngredients = (ingredients, action) => {
     const updatedIngredients = [...totalIngredients];

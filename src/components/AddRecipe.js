@@ -14,7 +14,7 @@ function AddRecipe() {
   const [suggestions, setSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
   const [nameToIngredient, setNameToIngredient] = useState({})
-  const [unitSuggestions, _] = useState(['szt', 'g', 'ml', 'łyżka', 'łyżeczka', 'szczypta', 'szklanka'])
+  const [unitSuggestions] = useState(['szt', 'g', 'ml', 'łyżka', 'łyżeczka', 'szczypta', 'szklanka'])
   const handleAddIngredient = () => {
     setRecipe({
       ...recipe,
